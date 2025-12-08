@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rohan | Kali Linux Terminal Portfolio</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #000;
+      color: #00ff00;
+      font-family: "Fira Code", "Consolas", "Monaco", monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      overflow: hidden;
+    }
+
+    .terminal {
+      width: 100%;
+      max-width: 1000px;
+      height: 85vh;
+      border: 1px solid #333;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
+    }
+
+    .terminal-header {
+      height: 28px;
+      background: #111;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border-bottom: 1px solid #333;
+      color: #00ff00;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .terminal-title {
+      flex: 1;
+      text-align: left;
+      user-select: none;
+      letter-spacing: 0.5px;
+    }
+
+    .linux-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .linux-controls span {
+      font-size: 16px;
+      color: #666;
+      cursor: default;
+    }
+
+    .linux-controls span:hover {
+      color: #00ff00;
+    }
+
+    .terminal-body {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #000;
+      color: #00ff00;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .line {
+      white-space: pre-wrap;
+      line-height: 1.4;
+      margin-bottom: 2px;
+    }
+
+    .prompt-line {
+      display: flex;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .prompt {
+      margin-right: 8px;
+      white-space: pre;
+      color: #00ff00;
+    }
+
+    #input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #00ff00;
+      font: inherit;
+      caret-color: transparent;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: #00ff00;
+      margin-left: 2px;
+      animation: blink 1s step-start infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    ::selection {
+      background: #00ff00;
+      color: #000;
+    }
+
+    .ascii-art {
+      color: #00ff00;
+      font-family: "Fira Code", monospace;
+      line-height: 1;
+      margin-bottom: 10px;
+      text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+    }
+
+    .header-separator {
+      border: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #00ff00, transparent);
+      margin: 10px 0;
+    }
+
+    a {
+      color: #00b7ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+      color: #ff0000;
+    }
+
+    .success {
+      color: #00ff00;
+    }
+
+    .warning {
+      color: #ffff00;
+    }
+
+    .info {
+      color: #00ffff;
+    }
+
+    .dim {
+      color: #008800;
+    }
+
+    .file {
+      color: #00ffff;
+    }
+
+    .dir {
+      color: #ffff00;
+    }
+
+    .exec {
+      color: #00ff00;
+    }
+
+    .root-prompt {
+      color: #ff0000;
+    }
+
+    .neofetch-container {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .neofetch-logo {
+      margin-right: 20px;
+      font-family: "Fira Code", monospace;
+      line-height: 1.1;
+      white-space: pre;
+    }
+
+    .neofetch-info {
+      flex: 1;
+    }
+
+    /* Scrollbar styling */
+    .terminal-body::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .terminal-body::-webkit-scrollbar-track {
+      background: #111;
+    }
+
+    .terminal-body::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 5px;
+    }
+
+    .terminal-body::-webkit-scrollbar-thumb:hover {
+      background: #444;
+    }
+
+    /* Destroyed system overlay */
+    .destroyed-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      color: #ff0000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Fira Code", monospace;
+      font-size: 16px;
+      text-align: center;
+      z-index: 9999;
+      flex-direction: column;
+      padding: 20px;
+      text-shadow: 0 0 10px #ff0000;
+    }
+
+    .destroyed-overlay .matrix {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          rgba(0, 255, 0, 0.1) 0px,
+          rgba(0, 255, 0, 0.1) 1px,
+          transparent 1px,
+          transparent 20px
+        );
+      animation: matrixRain 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes matrixRain {
+      from {
+        background-position: 0 0;
+      }
+      to {
+        background-position: 0 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal" id="terminal-root">
+    <div class="terminal-header">
+      <div class="terminal-title">root@kali:~</div>
+      <div class="linux-controls">
+        <span>⎯</span>
+        <span>□</span>
+        <span>×</span>
+      </div>
+    </div>
+    <div class="terminal-body" id="terminal">
+      <!-- ASCII Art Header -->
+      <div class="ascii-art" id="ascii-header"></div>
+      <hr class="header-separator">
+      
+      <!-- Terminal content starts here -->
+      <div class="prompt-line">
+        <span class="prompt" id="prompt">visitor@kali:~$</span>
+        <input id="input" autocomplete="off" autofocus />
+        <span class="cursor" id="cursor"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================
+    // ASCII Art - ROHAN in zigzag pattern
+    // ==========================
+    const asciiArt = [
+      "██████╗  ██████╗ ██╗  ██╗ █████╗ ███╗   ██╗",
+      "██╔══██╗██╔═══██╗██║  ██║██╔══██╗████╗  ██║",
+      "██████╔╝██║   ██║███████║███████║██╔██╗ ██║",
+      "██╔══██╗██║   ██║██╔══██║██╔══██║██║╚██╗██║",
+      "██║  ██║╚██████╔╝██║  ██║██║  ██║██║ ╚████║",
+      "╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝",
+      "",
+      "Kali Linux Terminal Portfolio v2.0",
+      "=================================="
+    ];
+
+    // Display ASCII art
+    document.getElementById('ascii-header').innerHTML = asciiArt.map(line => 
+      `<div>${line}</div>`
+    ).join('');
+
+    // ==========================
+    // Disk wipe persistence
+    // ==========================
+    const DESTROY_KEY = "kali_terminal_destroyed";
+
+    if (localStorage.getItem(DESTROY_KEY) === "1") {
+      showDestroyedOverlay();
+    }
+
+    function showDestroyedOverlay() {
+      const overlay = document.createElement("div");
+      overlay.className = "destroyed-overlay";
+      overlay.innerHTML = `
+        <div class="matrix"></div>
+        <div style="font-size: 24px; margin-bottom: 20px;">SYSTEM WIPED</div>
+        <div>Filesystem corruption detected</div>
+        <div>Kernel panic - not syncing: Attempted to kill init!</div>
+        <div style="margin-top: 30px; color: #00ff00;">Rebooting in 3...</div>
+      `;
+      document.body.innerHTML = "";
+      document.body.appendChild(overlay);
+
+      let count = 3;
+      const countdown = setInterval(() => {
+        count--;
+        if (count > 0) {
+          overlay.querySelector('div:last-child').textContent = 
+            `Rebooting in ${count}...`;
+        } else {
+          clearInterval(countdown);
+          localStorage.removeItem(DESTROY_KEY);
+          setTimeout(() => location.reload(), 1000);
+        }
+      }, 1000);
+    }
+
+    // ==========================
+    // Terminal core
+    // ==========================
+    const terminal = document.getElementById("terminal");
+    const input = document.getElementById("input");
+    const promptSpan = document.getElementById("prompt");
+    const cursor = document.getElementById("cursor");
+
+    let isRoot = false;
+    let awaitingPassword = false;
+    const ROOT_PASSWORD = "kali";
+
+    let history = [];
+    let historyIndex = -1;
+    let commandHistory = [];
+    let currentDir = "~";
+
+    // Filesystem structure
+    const fs = {
+      "/": ["home", "etc", "var", "root", "usr", "bin", "dev", "proc"],
+      "/home": ["visitor", "rohan"],
+      "/home/rohan": [
+        "about.txt",
+        "skills.txt",
+        "education.txt",
+        "projects.txt",
+        "contact.txt",
+        "experience.txt",
+        ".ssh",
+        ".config"
+      ],
+      "/home/rohan/.ssh": ["authorized_keys", "config"],
+      "/home/rohan/.config": ["neofetch", "htop"],
+      "/root": [".bashrc", ".profile", "secret.txt"],
+      "/etc": ["hosts", "passwd", "group", "motd", "issue"],
+      "/var": ["log", "tmp", "www"],
+      "/var/log": ["auth.log", "syslog", "kern.log"],
+      "/usr": ["bin", "lib", "share"],
+      "/usr/bin": ["python3", "bash", "gcc", "vim"],
+    };
+
+    const fileContents = {
+      "/etc/motd": "Welcome to Kali Linux Terminal Portfolio\nAuthorized access only.\n",
+      "/etc/issue": "Kali GNU/Linux Rolling \\n \\l\n",
+      "/home/rohan/about.txt": `ROHAN - Aspiring Software Developer & Cybersecurity Enthusiast
+=================================================================
+• Currently pursuing BCA-IT in Nepal
+• Passionate software developer with focus on web technologies
+• Cybersecurity enthusiast learning penetration testing
+• Linux system enthusiast and open-source contributor
+
+"From the mountains of Nepal to the world of code."\n`,
+      
+      "/home/rohan/skills.txt": `TECHNICAL SKILLS
+================
+• Programming Languages: JavaScript, Python, Java, C/C++
+• Web Development: HTML5, CSS3, React.js, Node.js, Express.js
+• Database: MongoDB, MySQL, PostgreSQL
+• Tools & Technologies: Git, Docker, Linux Terminal, VS Code
+• Cybersecurity Basics: Kali Linux, Network Security, Ethical Hacking
+• Currently Learning: Full Stack Development, DevOps, Cloud Computing\n`,
+      
+      "/home/rohan/education.txt": `EDUCATION BACKGROUND
+===================
+• BCA-IT (Bachelor of Computer Application - Information Technology)
+  - Purwanchal University, Nepal (Present)
+  - Relevant Coursework: Data Structures, Algorithms, Database Management, 
+    Web Technologies, Computer Networks, Software Engineering
+
+• Higher Secondary Education (+2)
+  - Management Stream with Computer Science
+  - Graded: A
+  
+• School Leaving Certificate (SLC)
+  - Graded: A+\n`,
+      
+      "/home/rohan/experience.txt": `DEVELOPMENT EXPERIENCE
+======================
+• Freelance Web Developer (Present)
+  - Developed responsive websites for local businesses in Nepal
+  - Created custom WordPress themes and plugins
+  - Implemented SEO optimization for better search rankings
+
+• Academic Projects:
+  - College Management System (Full Stack)
+  - E-commerce Website with React & Node.js
+  - Student Portfolio Website
+  - Library Management System
+
+• Open Source Contributions:
+  - Contributed to local Nepali tech community projects
+  - Participated in hackathons and coding competitions\n`,
+      
+      "/home/rohan/projects.txt": `PERSONAL & ACADEMIC PROJECTS
+===========================
+• Kali Terminal Portfolio (Current Project)
+  - Interactive terminal-style portfolio website
+  - Built with HTML, CSS, and JavaScript
+  - Features realistic Linux terminal simulation
+
+• Nepali E-Commerce Platform
+  - Full-stack e-commerce website for Nepali products
+  - Features: User authentication, product catalog, shopping cart, payment integration
+  - Tech: MERN Stack (MongoDB, Express, React, Node.js)
+
+• College ERP System
+  - Enterprise Resource Planning system for educational institutions
+  - Modules: Student management, attendance, grading, fee management
+  - Tech: Java Spring Boot, React, MySQL
+
+• Weather App with Nepali Cities
+  - Real-time weather application focusing on Nepali cities
+  - Features: Temperature, humidity, forecast, location-based services
+  - Tech: React.js, OpenWeather API, Geolocation API
+
+• Cybersecurity Toolbox
+  - Collection of basic security tools and scripts
+  - Includes: Port scanner, password strength checker, network monitor
+  - Tech: Python, Bash scripting\n`,
+      
+      "/home/rohan/contact.txt": `CONTACT INFORMATION & LINKS
+==========================
+• Email: rohanxett6@gmail.com
+• GitHub: https://github.com/RoyalRohan
+• LinkedIn: linkedin.com/in/rohan-ghimire
+• Twitter/X: @rohan_dev_np
+• Location: Birtamode, Nepal
+• Website: rohan-ghimire.com.np
+
+For collaboration or project inquiries, feel free to reach out!
+I'm always open to discussing tech, projects, or opportunities.\n`,
+      
+      "/root/secret.txt": "ROOT ACCESS GRANTED\nWelcome to the deepest level.\n\nFlag: K4L1_{N3P4L_4ND_C0D3}\n\n" +
+      "Personal Note:\n" +
+      "As a BCA-IT student from Nepal, I believe that technology knows no boundaries.\n" +
+      "From the Himalayas to your screen - connecting through code.\n",
+    };
+
+    // ==========================
+    // Terminal functions
+    // ==========================
+    function updatePrompt() {
+      const user = isRoot ? "root" : "visitor";
+      const dir = currentDir === "~" ? "~" : currentDir;
+      const symbol = isRoot ? "#" : "$";
+      promptSpan.textContent = `${user}@kali:${dir}${symbol}`;
+      promptSpan.className = isRoot ? "prompt root-prompt" : "prompt";
+    }
+
+    function printLine(text = "", className = "") {
+      const line = document.createElement("div");
+      line.className = `line ${className}`.trim();
+      line.textContent = text;
+      terminal.insertBefore(line, terminal.lastElementChild);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function printHTML(html) {
+      const line = document.createElement("div");
+      line.className = "line";
+      line.innerHTML = html;
+      terminal.insertBefore(line, terminal.lastElementChild);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function printMultiLine(text, className = "") {
+      text.split('\n').forEach(line => {
+        if (line.trim()) printLine(line, className);
+      });
+    }
+
+    // ==========================
+    // Kali Linux Neofetch
+    // ==========================
+    function showNeofetch() {
+      const kaliLogo = [
+        "       ..............",
+        "            ..,;:ccc,.",
+        "          ......''';lxO.",
+        ".....''''..........,:ld;",
+        "           .';;;:::;,,.x,",
+        "      ..'''.            0Xxoc:,.  ...",
+        "  ....                ,ONkc;,;cokOdc',.",
+        " .                   OMo           ':dd.",
+        "                    dMc               :o;",
+        "                   0M.                 .;",
+        "                   ;Wd",
+        "                    ;XO,",
+        "                      ,d0Odlc;,..",
+        "                          ..',;:cdOOd::,.",
+        "                                   .:d;.':;.",
+        "                                      'd,  .'",
+        "                                        ;l   ..",
+        "                                          .o",
+        "                                            c",
+        "                                            .'",
+        "                                             ."
+      ];
+
+      const neofetchHTML = `
+        <div class="neofetch-container">
+          <div class="neofetch-logo">
+${kaliLogo.join('\n')}
+          </div>
+          <div class="neofetch-info">
+            <div><span class="info">rohan</span>@<span class="warning">kali-terminal</span></div>
+            <div>----------------</div>
+            <div><span class="info">OS</span>: Kali Linux GNU/Linux x86_64</div>
+            <div><span class="info">Host</span>: Terminal Portfolio v2.0</div>
+            <div><span class="info">Kernel</span>: 6.5.0-kali3-amd64</div>
+            <div><span class="info">Uptime</span>: 24/7</div>
+            <div><span class="info">Shell</span>: bash 5.2.15</div>
+            <div><span class="info">Terminal</span>: web-terminal</div>
+            <div><span class="info">Location</span>: Birtamode, Nepal</div>
+            <div><span class="info">Education</span>: BCA-IT Student</div>
+            <div><span class="info">Focus</span>: Full Stack Development & Security</div>
+            <div><span class="info">Memory</span>: 8192MiB / 16384MiB</div>
+          </div>
+        </div>
+      `;
+
+      printHTML(neofetchHTML);
+      printLine("");
+      printLine("Type 'help' to see available commands");
+    }
+
+    // ==========================
+    // Command implementations
+    // ==========================
+    const commands = {
+      help: () => [
+        "Available commands:",
+        "  help                    - Display this help message",
+        "  clear                   - Clear terminal screen",
+        "  whoami                  - Display current user",
+        "  id                      - Show user identity",
+        "  pwd                     - Print working directory",
+        "  ls [dir]                - List directory contents",
+        "  cd [dir]                - Change directory",
+        "  cat [file]              - Display file contents",
+        "  neofetch                - Display system information",
+        "  uname [-a]              - Print system information",
+        "  date                    - Show current date and time",
+        "  echo [text]             - Display a line of text",
+        "  history                 - Show command history",
+        "",
+        "  about                   - About me",
+        "  skills                  - My technical skills",
+        "  education               - My education background",
+        "  experience              - My development experience",
+        "  projects                - My projects",
+        "  contact                 - Contact information",
+        "",
+        "  sudo su                 - Switch to root user",
+        "  exit                    - Exit root shell",
+        "  reboot                  - Reboot the system",
+        "  shutdown                - Shutdown the system",
+        "  sudo rm -rf /           - Wipe filesystem (ROOT ONLY - DANGER)",
+        "",
+        "Root-only commands:",
+        "  secret                  - View root secrets",
+      ].join('\n'),
+
+      whoami: () => isRoot ? "root" : "visitor",
+      
+      id: () => isRoot ? 
+        "uid=0(root) gid=0(root) groups=0(root)" : 
+        "uid=1000(visitor) gid=1000(visitor) groups=1000(visitor),4(adm),24(cdrom),27(sudo)",
+      
+      date: () => {
+        const now = new Date();
+        const nepalTime = new Date(now.getTime() + (5*60 + 45)*60*1000); // Nepal is UTC+5:45
+        return nepalTime.toLocaleString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          timeZoneName: 'short'
+        }) + " (Nepal Time)";
+      },
+      
+      echo: (args) => args.join(' '),
+      
+      history: () => commandHistory.map((cmd, i) => `${i + 1}  ${cmd}`).join('\n'),
+      
+      "uname -a": () => "Linux kali-terminal 6.5.0-kali3-amd64 #1 SMP PREEMPT_DYNAMIC Kali 6.5.13-1kali1 (2023-12-04) x86_64 GNU/Linux",
+      
+      uname: () => "Linux",
+      
+      about: () => fileContents["/home/rohan/about.txt"],
+      
+      skills: () => fileContents["/home/rohan/skills.txt"],
+      
+      education: () => fileContents["/home/rohan/education.txt"],
+      
+      experience: () => fileContents["/home/rohan/experience.txt"],
+      
+      projects: () => fileContents["/home/rohan/projects.txt"],
+      
+      contact: () => fileContents["/home/rohan/contact.txt"],
+      
+      reboot: () => {
+        printLine("System rebooting...");
+        setTimeout(() => {
+          terminal.innerHTML = '';
+          printHTML('<div class="ascii-art" id="ascii-header"></div>');
+          document.getElementById('ascii-header').innerHTML = asciiArt.map(line => 
+            `<div>${line}</div>`
+          ).join('');
+          printLine("");
+          showNeofetch();
+          updatePrompt();
+          printLine("");
+          terminal.scrollTop = terminal.scrollHeight;
+        }, 1000);
+        return "Reboot initiated";
+      },
+      
+      shutdown: () => {
+        printLine("System shutting down...");
+        setTimeout(() => {
+          document.body.style.opacity = "0";
+          setTimeout(() => {
+            printLine("Connection closed by remote host.");
+            input.disabled = true;
+          }, 1000);
+        }, 1000);
+        return "Shutdown sequence started";
+      },
+      
+      exit: () => {
+        if (isRoot) {
+          isRoot = false;
+          currentDir = "~";
+          updatePrompt();
+          return "Exited root shell";
+        }
+        return "Not in root shell";
+      },
+      
+      clear: () => {
+        const asciiHeader = document.querySelector('.ascii-art');
+        const separator = document.querySelector('.header-separator');
+        const promptLine = document.querySelector('.prompt-line');
+        
+        terminal.innerHTML = '';
+        if (asciiHeader) terminal.appendChild(asciiHeader);
+        if (separator) terminal.appendChild(separator);
+        if (promptLine) terminal.appendChild(promptLine);
+        
+        return "";
+      },
+
+      neofetch: () => {
+        showNeofetch();
+        return "";
+      },
+    };
+
+    // ==========================
+    // Filesystem commands
+    // ==========================
+    function resolvePath(path) {
+      if (!path || path === "~") return "/home/rohan";
+      if (path === ".") return currentDir === "~" ? "/home/rohan" : currentDir;
+      if (path === "..") {
+        const base = currentDir === "~" ? "/home/rohan" : currentDir;
+        if (base === "/") return "/";
+        const parts = base.split('/').filter(p => p);
+        parts.pop();
+        return parts.length ? `/${parts.join('/')}` : "/";
+      }
+      if (path.startsWith("/")) return path;
+      
+      const base = currentDir === "~" ? "/home/rohan" : currentDir;
+      return base === "/" ? `/${path}` : `${base}/${path}`;
+    }
+
+    function cmd_ls(args) {
+      const path = args.length ? resolvePath(args[0]) : 
+                   (currentDir === "~" ? "/home/rohan" : currentDir);
+      
+      if (!fs[path]) {
+        return `ls: cannot access '${args[0]}': No such file or directory`;
+      }
+      
+      const items = fs[path];
+      const output = items.map(item => {
+        const fullPath = path === "/" ? `/${item}` : `${path}/${item}`;
+        if (fs[fullPath]) {
+          return `<span class="dir">${item}/</span>`;
+        } else {
+          const color = item.startsWith('.') ? 'dim' : 'file';
+          return `<span class="${color}">${item}</span>`;
+        }
+      }).join('  ');
+      
+      return output;
+    }
+
+    function cmd_cd(args) {
+      if (!args.length || args[0] === "~") {
+        currentDir = "~";
+        updatePrompt();
+        return "";
+      }
+      
+      const target = resolvePath(args[0]);
+      if (!fs[target]) {
+        return `bash: cd: ${args[0]}: No such file or directory`;
+      }
+      
+      currentDir = target === "/home/rohan" ? "~" : target;
+      updatePrompt();
+      return "";
+    }
+
+    function cmd_pwd() {
+      return currentDir === "~" ? "/home/rohan" : currentDir;
+    }
+
+    function cmd_cat(args) {
+      if (!args.length) return "Usage: cat <file>";
+      
+      let filePath;
+      if (args[0].startsWith("/")) {
+        filePath = args[0];
+      } else if (currentDir === "~") {
+        filePath = `/home/rohan/${args[0]}`;
+      } else {
+        filePath = `${currentDir}/${args[0]}`;
+      }
+      
+      if (fileContents[filePath]) {
+        return fileContents[filePath];
+      }
+      
+      return `cat: ${args[0]}: No such file or directory`;
+    }
+
+    // ==========================
+    // Root-only commands
+    // ==========================
+    function handleSecret() {
+      if (!isRoot) {
+        return "Permission denied. Use 'sudo su' first.";
+      }
+      return fileContents["/root/secret.txt"];
+    }
+
+    function handleWipeSystem() {
+      if (!isRoot) {
+        return "Permission denied. Requires root privileges.";
+      }
+      
+      const wipeSequence = [
+        { delay: 0, msg: "sudo rm -rf /" },
+        { delay: 500, msg: "rm: it is dangerous to operate recursively on '/'" },
+        { delay: 1000, msg: "rm: use --no-preserve-root to override this failsafe" },
+        { delay: 1500, msg: "sudo rm -rf / --no-preserve-root" },
+        { delay: 2000, msg: "Wiping filesystem..." },
+        { delay: 2500, msg: "Deleting /home, /etc, /var, /usr..." },
+        { delay: 3000, msg: "Removing system binaries..." },
+        { delay: 3500, msg: "Zeroing out disk sectors..." },
+        { delay: 4000, msg: "Filesystem corrupted!" },
+        { delay: 4500, msg: "Kernel panic - not syncing: VFS: Unable to mount root fs" },
+        { delay: 5000, msg: "System halted." },
+      ];
+      
+      wipeSequence.forEach(({ delay, msg }) => {
+        setTimeout(() => printLine(msg, "error"), delay);
+      });
+      
+      setTimeout(() => {
+        localStorage.setItem(DESTROY_KEY, "1");
+        setTimeout(() => location.reload(), 1000);
+      }, 5500);
+      
+      return "Initiating filesystem wipe...";
+    }
+
+    // ==========================
+    // Command processor
+    // ==========================
+    function processCommand(raw) {
+      const trimmed = raw.trim();
+      if (!trimmed) return;
+      
+      // Add to history
+      commandHistory.push(trimmed);
+      if (commandHistory.length > 50) commandHistory.shift();
+      
+      // Display command
+      printLine(`${promptSpan.textContent} ${trimmed}`);
+      
+      // Handle password input
+      if (awaitingPassword) {
+        if (trimmed === ROOT_PASSWORD) {
+          isRoot = true;
+          currentDir = "~";
+          updatePrompt();
+          awaitingPassword = false;
+          return "Authentication successful. Welcome, root.";
+        } else {
+          awaitingPassword = false;
+          return "Authentication failed.";
+        }
+      }
+      
+      // Parse command
+      const parts = trimmed.split(/\s+/);
+      const cmd = parts[0];
+      const args = parts.slice(1);
+      
+      // Special commands
+      if (cmd === "sudo" && args[0] === "su") {
+        if (isRoot) {
+          return "Already root.";
+        }
+        awaitingPassword = true;
+        return "[sudo] password for visitor:";
+      }
+      
+      if (cmd === "secret") {
+        return handleSecret();
+      }
+      
+      // Handle sudo rm -rf /
+      if (cmd === "sudo" && args[0] === "rm" && args[1] === "-rf" && args[2] === "/") {
+        return handleWipeSystem();
+      }
+      
+      // Also handle sudo rm -rf / --no-preserve-root for completeness
+      if (cmd === "sudo" && args[0] === "rm" && args[1] === "-rf" && args[2] === "/" && args[3] === "--no-preserve-root") {
+        return handleWipeSystem();
+      }
+      
+      // Filesystem commands
+      if (cmd === "ls") {
+        const result = cmd_ls(args);
+        if (result.includes('<span')) {
+          printHTML(result);
+          return "";
+        }
+        return result;
+      }
+      
+      if (cmd === "cd") {
+        return cmd_cd(args);
+      }
+      
+      if (cmd === "pwd") {
+        return cmd_pwd();
+      }
+      
+      if (cmd === "cat") {
+        return cmd_cat(args);
+      }
+      
+      // Regular commands
+      if (commands[cmd]) {
+        if (cmd === "clear") {
+          commands.clear();
+          return "";
+        }
+        if (cmd === "neofetch") {
+          commands.neofetch();
+          return "";
+        }
+        return typeof commands[cmd] === 'function' ? 
+               commands[cmd](args) : commands[cmd];
+      }
+      
+      // Command not found
+      return `bash: ${cmd}: command not found`;
+    }
+
+    // ==========================
+    // Input handling
+    // ==========================
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const command = input.value.trim();
+        if (command) {
+          const result = processCommand(command);
+          if (result) printLine(result);
+          input.value = '';
+          history.push(command);
+          historyIndex = history.length;
+          moveCursor();
+        }
+        e.preventDefault();
+      } else if (e.key === 'ArrowUp') {
+        if (historyIndex > 0) {
+          historyIndex--;
+          input.value = history[historyIndex] || '';
+          moveCursor();
+        }
+        e.preventDefault();
+      } else if (e.key === 'ArrowDown') {
+        if (historyIndex < history.length - 1) {
+          historyIndex++;
+          input.value = history[historyIndex] || '';
+        } else {
+          historyIndex = history.length;
+          input.value = '';
+        }
+        moveCursor();
+        e.preventDefault();
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        // Basic tab completion would go here
+      }
+    });
+
+    input.addEventListener('input', moveCursor);
+
+    function moveCursor() {
+      const text = input.value;
+      const span = document.createElement('span');
+      span.style.visibility = 'hidden';
+      span.style.position = 'absolute';
+      span.style.whiteSpace = 'pre';
+      span.style.font = getComputedStyle(input).font;
+      span.textContent = text;
+      document.body.appendChild(span);
+      const width = span.getBoundingClientRect().width;
+      document.body.removeChild(span);
+      cursor.style.transform = `translateX(${width}px)`;
+    }
+
+    // Click anywhere to focus input
+    terminal.addEventListener('click', () => input.focus());
+
+    // ==========================
+    // Initialize
+    // ==========================
+    function init() {
+      updatePrompt();
+      showNeofetch();
+      printLine("");
+      input.focus();
+      moveCursor();
+    }
+
+    // Start everything
+    init();
+  </script>
+</body>
+</html>

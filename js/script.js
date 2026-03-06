@@ -1,7 +1,9 @@
+(function(){
+emailjs.init("lFDGTojGi4gndClgW");
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
-    
-    emailjs.init("lFDGTojGi4gndClgW");
 
     const loadingScreen = document.getElementById('loading-screen');
     
@@ -283,9 +285,9 @@ document.addEventListener('DOMContentLoaded', () => {
         contactForm.reset();
     })
     .catch((error) => {
-        console.error(error);
-        showToast("Failed to send message. Please try again.", "error");
-    })
+    console.error("EMAILJS ERROR:", error);
+    showToast("Failed to send message. Please try again.", "error");
+})
     .finally(() => {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;

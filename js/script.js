@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
 
-    emailjs.sendForm("service_6tdhyec","template_sff1c6i", contactForm)
+    emailjs.sendForm("service_6tdhyec","template_sff1c6i", contactForm, "lFDGTojGi4gndClgW")
     .then(() => {
         showToast("Message sent successfully! I'll get back to you soon.", "success");
         contactForm.reset();

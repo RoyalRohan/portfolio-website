@@ -252,51 +252,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(contactForm);
-        const name = formData.get('name');
-        const email = formData.get('email');
-        const subject = formData.get('subject');
-        const message = formData.get('message');
-        
-        if (!name || !email || !subject || !message) {
-            showToast('Please fill in all fields', 'error');
-            return;
-        }
-        
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            showToast('Please enter a valid email address', 'error');
-            return;
-        }
-        
-        const submitBtn = contactForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
-        
-        emailjs.sendForm("service_6tdhyec","template_sff1c6i", contactForm)
-.then(() => {
+    e.preventDefault();
 
-    showToast("Message sent successfully! I'll get back to you soon.", "success");
-    contactForm.reset();
+    const formData = new FormData(contactForm);
+    const name = formData.get('name');
+    const email = formData.get('email');
+    const subject = formData.get('subject');
+    const message = formData.get('message');
 
-})
-.catch((error) => {
+    if (!name || !email || !subject || !message) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
 
-    showToast("Failed to send message. Please try again.", "error");
-    console.error(error);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast('Please enter a valid email address', 'error');
+        return;
+    }
 
-})
-.finally(() => {
+    const submitBtn = contactForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
 
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
+
+    emailjs.sendForm("service_6tdhyec","template_sff1c6i", contactForm)
+    .then(() => {
+        showToast("Message sent successfully! I'll get back to you soon.", "success");
+        contactForm.reset();
+    })
+    .catch((error) => {
+        console.error(error);
+        showToast("Failed to send message. Please try again.", "error");
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
 
 });
-
     
     const techCards = document.querySelectorAll('.tech-card');
     

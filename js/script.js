@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
+    
+    emailjs.init("lFDGTojGi4gndClgW");
 
     const loadingScreen = document.getElementById('loading-screen');
     
@@ -275,13 +277,25 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
         
-        setTimeout(() => {
-            showToast('Message sent successfully! I\'ll get back to you soon.', 'success');
-            contactForm.reset();
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }, 2000);
-    });
+        emailjs.sendForm("service_6tdhyec","template_sff1c6i", contactForm)
+.then(() => {
+
+    showToast("Message sent successfully! I'll get back to you soon.", "success");
+    contactForm.reset();
+
+})
+.catch((error) => {
+
+    showToast("Failed to send message. Please try again.", "error");
+    console.error(error);
+
+})
+.finally(() => {
+
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+
+});
 
     
     const techCards = document.querySelectorAll('.tech-card');

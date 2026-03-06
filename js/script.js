@@ -1,7 +1,13 @@
-emailjs.init("lFDGTojGi4gndClgW");
-
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
+
+    // Initialize EmailJS
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init("lFDGTojGi4gndClgW");
+        console.log('EmailJS initialized');
+    } else {
+        console.error('EmailJS library not loaded');
+    }
 
     const loadingScreen = document.getElementById('loading-screen');
     
@@ -107,11 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!isDeleting && charIndex === currentPhrase.length) {
             isDeleting = true;
-            typingSpeed = 2000; // Pause at end
+            typingSpeed = 2000;
         } else if (isDeleting && charIndex === 0) {
             isDeleting = false;
             phraseIndex = (phraseIndex + 1) % phrases.length;
-            typingSpeed = 500; // Pause before typing
+            typingSpeed = 500;
         }
 
         setTimeout(typeText, typingSpeed);
@@ -126,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-                // Add staggered delay
                 setTimeout(() => {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
@@ -232,6 +237,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast');
 
     function showToast(message, type = 'success') {
+        if (!toast) {
+            console.error('Toast element not found');
+            return;
+        }
         const toastMessage = toast.querySelector('.toast-message');
         const toastIcon = toast.querySelector('.toast-icon');
         
@@ -252,47 +261,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+    // Only attach listener if form exists
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            console.log('🔵 Submit handler triggered!'); // This should appear in console
 
-    const formData = new FormData(contactForm);
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const subject = formData.get('subject');
-    const message = formData.get('message');
+            const formData = new FormData(contactForm);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const subject = formData.get('subject');
+            const message = formData.get('message');
 
-    if (!name || !email || !subject || !message) {
-        showToast('Please fill in all fields', 'error');
-        return;
+            console.log('Form data:', { name, email, subject, message }); // Log form data
+
+            if (!name || !email || !subject || !message) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
+
+            // Use emailjs.sendForm with just service and template (public key already set)
+            emailjs.sendForm("service_6tdhyec", "template_sff1c6i", contactForm)
+                .then(() => {
+                    console.log('EmailJS success');
+                    showToast("Message sent successfully! I'll get back to you soon.", "success");
+                    contactForm.reset();
+                })
+                .catch((error) => {
+                    console.error("EMAILJS ERROR:", error);
+                    showToast("Failed to send message. Please try again.", "error");
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                });
+        });
+        console.log('Submit event listener attached to contact form');
+    } else {
+        console.error('Contact form not found! Check the form ID.');
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showToast('Please enter a valid email address', 'error');
-        return;
-    }
-
-    const submitBtn = contactForm.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Sending...</span>';
-
-    emailjs.sendForm("service_6tdhyec","template_sff1c6i", contactForm)
-    .then(() => {
-        showToast("Message sent successfully! I'll get back to you soon.", "success");
-        contactForm.reset();
-    })
-    .catch((error) => {
-    console.error("EMAILJS ERROR:", error);
-    showToast("Failed to send message. Please try again.", "error");
-})
-    .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-    });
-
-});
     
     const techCards = document.querySelectorAll('.tech-card');
     
@@ -370,34 +389,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const nameHighlight = document.querySelector('.name-highlight');
-    const originalText = nameHighlight.textContent;
-    const glitchChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-    
-    function glitchText() {
-        let iterations = 0;
-        const maxIterations = 10;
+    if (nameHighlight) {
+        const originalText = nameHighlight.textContent;
+        const glitchChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
         
-        const interval = setInterval(() => {
-            nameHighlight.textContent = originalText
-                .split('')
-                .map((char, index) => {
-                    if (index < iterations) {
-                        return originalText[index];
-                    }
-                    return glitchChars[Math.floor(Math.random() * glitchChars.length)];
-                })
-                .join('');
+        function glitchText() {
+            let iterations = 0;
             
-            iterations += 1/3;
-            
-            if (iterations >= originalText.length) {
-                clearInterval(interval);
-                nameHighlight.textContent = originalText;
-            }
-        }, 30);
-    }
+            const interval = setInterval(() => {
+                nameHighlight.textContent = originalText
+                    .split('')
+                    .map((char, index) => {
+                        if (index < iterations) {
+                            return originalText[index];
+                        }
+                        return glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                    })
+                    .join('');
+                
+                iterations += 1/3;
+                
+                if (iterations >= originalText.length) {
+                    clearInterval(interval);
+                    nameHighlight.textContent = originalText;
+                }
+            }, 30);
+        }
 
-    setInterval(glitchText, 8000);
+        setInterval(glitchText, 8000);
+    }
 
     
     const currentYearEl = document.getElementById('currentYear');
@@ -407,7 +427,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
     document.addEventListener('keydown', (e) => {
-     
         if (e.key === 'Escape') {
             navToggle.classList.remove('active');
             navMenu.classList.remove('active');
@@ -418,7 +437,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     
     if (prefersReducedMotion.matches) {
-        // Disable animations
         document.querySelectorAll('*').forEach(el => {
             el.style.animation = 'none';
             el.style.transition = 'none';
@@ -427,7 +445,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            // Pause expensive operations
             revealObserver.disconnect();
             counterObserver.disconnect();
             headerObserver.disconnect();
@@ -560,7 +577,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const originalText = title.textContent;
                 const scrambler = new TextScramble(title);
                 
-                // Extract the accent part
                 const accentEl = title.querySelector('.title-accent');
                 if (accentEl) {
                     const accentText = accentEl.textContent;

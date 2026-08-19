@@ -1113,11 +1113,6 @@ img {
     margin-top: 3rem;
 }
 
-
-    padding: var(--section-padding) 0;
-    position: relative;
-}
-
 .stats-container {
     max-width: 900px;
     margin: 0 auto;

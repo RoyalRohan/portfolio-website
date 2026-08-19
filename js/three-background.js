@@ -177,7 +177,10 @@
 
     
     let frameCount = 0;
-    const updateInterval = isTouchDevice ? 2 : 1; 
+    const updateInterval = isTouchDevice ? 2 : 1;
+    let animationFrameId = null;
+    let scrollAnimationId = null;
+    let isPageVisible = !document.hidden;
 
     function animate() {
         requestAnimationFrame(animate);

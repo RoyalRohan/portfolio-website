@@ -4,9 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize EmailJS
     if (typeof emailjs !== 'undefined') {
         emailjs.init("lFDGTojGi4gndClgW");
-        console.log('EmailJS initialized');
     } else {
-        console.error('EmailJS library not loaded');
     }
 
     const loadingScreen = document.getElementById('loading-screen');
@@ -233,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
     const contactForm = document.querySelector('#contactForm');
-    console.log("Contact form loaded:", contactForm);
     const toast = document.getElementById('toast');
 
     function showToast(message, type = 'success') {
@@ -265,15 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactForm) {
         contactForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            console.log('🔵 Submit handler triggered!'); // This should appear in console
 
             const formData = new FormData(contactForm);
             const name = formData.get('name');
             const email = formData.get('email');
             const subject = formData.get('subject');
             const message = formData.get('message');
-
-            console.log('Form data:', { name, email, subject, message }); // Log form data
 
             if (!name || !email || !subject || !message) {
                 showToast('Please fill in all fields', 'error');
@@ -295,7 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Use emailjs.sendForm with just service and template (public key already set)
             emailjs.sendForm("service_6tdhyec", "template_sff1c6i", contactForm)
                 .then(() => {
-                    console.log('EmailJS success');
                     showToast("Message sent successfully! I'll get back to you soon.", "success");
                     contactForm.reset();
                 })
@@ -308,9 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.innerHTML = originalText;
                 });
         });
-        console.log('Submit event listener attached to contact form');
     } else {
-        console.error('Contact form not found! Check the form ID.');
     }
     
     const techCards = document.querySelectorAll('.tech-card');
@@ -444,14 +435,169 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            revealObserver.disconnect();
-            counterObserver.disconnect();
-            headerObserver.disconnect();
+        // Observers intentionally stay connected so sections still reveal correctly
+        // when the visitor returns to the tab.
+        if (!document.hidden && typingElement && !typingElement.textContent) {
+            typeText();
         }
     });
 
     
+
+    // ---------------------------------------------------------
+    // Live GitHub profile data
+    // Uses only GitHub's public REST API. Nothing is hard-coded.
+    // ---------------------------------------------------------
+    const githubUsername = 'RoyalRohan';
+    const githubApi = 'https://api.github.com';
+    const githubAvatar = document.getElementById('githubAvatar');
+    const githubName = document.getElementById('githubName');
+    const githubBio = document.getElementById('githubBio');
+    const githubMetrics = document.getElementById('githubMetrics');
+    const githubEvents = document.getElementById('githubEvents');
+
+    const githubEventMeta = {
+        PushEvent: { icon: 'fas fa-code-commit', label: 'Pushed code to' },
+        CreateEvent: { icon: 'fas fa-plus', label: 'Created' },
+        PullRequestEvent: { icon: 'fas fa-code-pull-request', label: 'Updated pull request' },
+        IssuesEvent: { icon: 'fas fa-circle-dot', label: 'Updated issue in' },
+        ReleaseEvent: { icon: 'fas fa-tag', label: 'Published a release in' },
+        ForkEvent: { icon: 'fas fa-code-fork', label: 'Forked' },
+        WatchEvent: { icon: 'fas fa-star', label: 'Starred' }
+    };
+
+    function setGithubMetric(key, value) {
+        const el = githubMetrics?.querySelector(`[data-github="${key}"]`);
+        if (!el) return;
+        el.textContent = value;
+        el.classList.remove('skeleton');
+    }
+
+    function formatRelativeDate(isoDate) {
+        const date = new Date(isoDate);
+        const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+        if (seconds < 60) return 'just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days < 30) return `${days}d ago`;
+        const months = Math.floor(days / 30);
+        if (months < 12) return `${months}mo ago`;
+        return `${Math.floor(months / 12)}y ago`;
+    }
+
+    function eventRepositoryName(event) {
+        return event?.repo?.name || `${githubUsername}'s repository`;
+    }
+
+    function eventDescription(event) {
+        const repo = eventRepositoryName(event);
+        switch (event.type) {
+            case 'PushEvent': {
+                const commits = event.payload?.size || event.payload?.commits?.length || 0;
+                return `${githubEventMeta.PushEvent.label} ${repo}${commits ? ` · ${commits} commit${commits === 1 ? '' : 's'}` : ''}`;
+            }
+            case 'CreateEvent':
+                return `${githubEventMeta.CreateEvent.label} ${event.payload?.ref_type || 'repository'} in ${repo}`;
+            case 'PullRequestEvent':
+                return `${githubEventMeta.PullRequestEvent.label} in ${repo}`;
+            case 'IssuesEvent':
+                return `${githubEventMeta.IssuesEvent.label} ${repo}`;
+            case 'ReleaseEvent':
+                return `${githubEventMeta.ReleaseEvent.label} ${repo}`;
+            case 'ForkEvent':
+                return `${githubEventMeta.ForkEvent.label} ${repo}`;
+            case 'WatchEvent':
+                return `${githubEventMeta.WatchEvent.label} ${repo}`;
+            default:
+                return `Activity in ${repo}`;
+        }
+    }
+
+    function renderGithubEvents(events) {
+        if (!githubEvents) return;
+
+        const supported = events
+            .filter(event => githubEventMeta[event.type])
+            .slice(0, 5);
+
+        if (!supported.length) {
+            githubEvents.innerHTML = `
+                <div class="github-error">
+                    Recent public events are quiet right now. <a href="https://github.com/${githubUsername}?tab=overview" target="_blank" rel="noopener">View the full GitHub activity →</a>
+                </div>`;
+            return;
+        }
+
+        githubEvents.innerHTML = supported.map(event => {
+            const meta = githubEventMeta[event.type];
+            const repoUrl = `https://github.com/${eventRepositoryName(event)}`;
+            return `
+                <div class="github-event">
+                    <div class="github-event-icon"><i class="${meta.icon}"></i></div>
+                    <div class="github-event-copy">
+                        <strong>${eventDescription(event)}</strong>
+                        <span>${formatRelativeDate(event.created_at)}</span>
+                    </div>
+                    <a href="${repoUrl}" target="_blank" rel="noopener" aria-label="Open ${eventRepositoryName(event)}">
+                        <i class="fas fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>`;
+        }).join('');
+    }
+
+    async function loadGithubProfile() {
+        if (!githubMetrics) return;
+
+        try {
+            const [profileResponse, reposResponse, eventsResponse] = await Promise.all([
+                fetch(`${githubApi}/users/${githubUsername}`, { headers: { Accept: 'application/vnd.github+json' } }),
+                fetch(`${githubApi}/users/${githubUsername}/repos?per_page=100&sort=updated`, { headers: { Accept: 'application/vnd.github+json' } }),
+                fetch(`${githubApi}/users/${githubUsername}/events/public?per_page=20`, { headers: { Accept: 'application/vnd.github+json' } })
+            ]);
+
+            if (!profileResponse.ok) throw new Error(`GitHub profile request failed: ${profileResponse.status}`);
+
+            const profile = await profileResponse.json();
+            const repos = reposResponse.ok ? await reposResponse.json() : [];
+            const events = eventsResponse.ok ? await eventsResponse.json() : [];
+
+            if (githubAvatar && profile.avatar_url) githubAvatar.src = profile.avatar_url;
+            if (githubName) githubName.textContent = profile.name || profile.login || githubUsername;
+            if (githubBio) githubBio.textContent = profile.bio || 'Software developer and cybersecurity enthusiast from Nepal.';
+
+            const publicRepoCount = Number(profile.public_repos || repos.length || 0);
+            const totalStars = Array.isArray(repos)
+                ? repos.reduce((sum, repo) => sum + Number(repo.stargazers_count || 0), 0)
+                : 0;
+
+            setGithubMetric('repos', publicRepoCount);
+            setGithubMetric('followers', Number(profile.followers || 0));
+            setGithubMetric('following', Number(profile.following || 0));
+            setGithubMetric('stars', totalStars);
+
+            renderGithubEvents(Array.isArray(events) ? events : []);
+        } catch (error) {
+            console.warn('GitHub live data unavailable:', error);
+            document.querySelectorAll('.github-metric-value').forEach(el => {
+                if (el.textContent === '—') el.classList.remove('skeleton');
+            });
+            if (githubBio) {
+                githubBio.textContent = 'Live GitHub data is temporarily unavailable. The profile links above remain available.';
+            }
+            if (githubEvents) {
+                githubEvents.innerHTML = `
+                    <div class="github-error">
+                        GitHub's public API could not be reached right now. <a href="https://github.com/${githubUsername}?tab=overview" target="_blank" rel="noopener">Open the live profile →</a>
+                    </div>`;
+            }
+        }
+    }
+
+    loadGithubProfile();
+
     console.log('%c👋 Hey there, curious developer!', 'font-size: 20px; font-weight: bold; color: #00d9ff;');
     console.log('%cWelcome to my portfolio!', 'font-size: 14px; color: #b0b0c0;');
     console.log('%cFeel free to explore the code. 🔍', 'font-size: 14px; color: #00ff88;');
@@ -594,9 +740,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sectionTitles.forEach(title => titleObserver.observe(title));
 
-    document.addEventListener('click', (e) => {
-        createParticleBurst(e.clientX, e.clientY);
-    });
+    if (!window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.addEventListener('click', (e) => {
+            createParticleBurst(e.clientX, e.clientY);
+        });
+    }
 
     function createParticleBurst(x, y) {
         const particleCount = 8;
